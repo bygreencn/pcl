@@ -104,7 +104,7 @@ pcl::visualization::PointPickingCallback::Execute (vtkObject *caller, unsigned l
       style->OnLeftButtonUp ();
       std::vector<int> indices;
       int nb_points = performAreaPick (iren, indices);
-      AreaPickingEvent event (nb_points, indices);
+      AreaPickingEvent event(nb_points, indices, iren->GetShiftKey(), iren->GetControlKey(), iren->GetAltKey());
       style->area_picking_signal_ (event);
     }
   }

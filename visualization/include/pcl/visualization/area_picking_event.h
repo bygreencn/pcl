@@ -49,9 +49,15 @@ namespace pcl
     class PCL_EXPORTS AreaPickingEvent
     {
       public:
-        AreaPickingEvent (int nb_points, const std::vector<int>& indices)
+        AreaPickingEvent (int nb_points, const std::vector<int>& indices,
+			int shift,
+			int ctrl,
+			int alt)
           : nb_points_ (nb_points)
           , indices_ (indices)
+		  , shift_(shift)
+		  , ctrl_(ctrl_)
+		  , alt_(alt)
         {}
 
         /** \brief For situations where a whole are is selected, return the points indices.
@@ -66,10 +72,25 @@ namespace pcl
           indices = indices_;
           return (true);
         }
+		inline int GetShiftKey() const
+		{
+			return shift_;
+		}
+		inline int GetAltKey() const
+		{
+			return alt_;
+		}
+		inline int GetCtrlKey() const
+		{
+			return ctrl_;
+		}
 
       private:
         int nb_points_;
         std::vector<int> indices_;
+		int shift_;
+		int ctrl_;
+		int alt_;
     };
   } //namespace visualization
 } //namespace pcl
