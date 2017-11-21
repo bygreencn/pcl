@@ -112,6 +112,26 @@ namespace pcl
           */
         PCLVisualizer (int &argc, char **argv, const std::string &name = "",
             PCLVisualizerInteractorStyle* style = PCLVisualizerInteractorStyle::New (), const bool create_interactor = true);
+            
+        /** \brief PCL Visualizer constructor.
+          * \param[in] custom vtk renderer
+          * \param[in] custom vtk render window
+          * \param[in] create_interactor if true (default), create an interactor, false otherwise
+          */
+        PCLVisualizer (vtkSmartPointer<vtkRenderer> ren, vtkSmartPointer<vtkRenderWindow> wind, const std::string &name = "", const bool create_interactor = true);
+
+        /** \brief PCL Visualizer constructor.
+          * \param[in] argc
+          * \param[in] argv
+          * \param[in] custom vtk renderer
+          * \param[in] custom vtk render window
+          * \param[in] style interactor style (defaults to PCLVisualizerInteractorStyle)
+          * \param[in] create_interactor if true (default), create an interactor, false otherwise
+          */
+        PCLVisualizer (int &argc, char **argv, vtkSmartPointer<vtkRenderer> ren, vtkSmartPointer<vtkRenderWindow> wind, const std::string &name = "",
+                       PCLVisualizerInteractorStyle* style = PCLVisualizerInteractorStyle::New (),
+                       const bool create_interactor = true);
+
 
         /** \brief PCL Visualizer destructor. */
         virtual ~PCLVisualizer ();
@@ -273,16 +293,6 @@ namespace pcl
         /** \brief Disables the Orientatation Marker Widget so it is removed from the renderer */
         void
         removeOrientationMarkerWidgetAxes ();
-        
-        /** \brief Adds 3D axes describing a coordinate system to screen at 0,0,0.
-          * \param[in] scale the scale of the axes (default: 1)
-          * \param[in] viewport the view port where the 3D axes should be added (default: all)
-          */
-        PCL_DEPRECATED (
-        "addCoordinateSystem (scale, viewport) is deprecated, please use function "
-        "addCoordinateSystem (scale, id, viewport) with id a unique string identifier.")
-        void
-        addCoordinateSystem (double scale, int viewport);
 
         /** \brief Adds 3D axes describing a coordinate system to screen at 0,0,0.
           * \param[in] scale the scale of the axes (default: 1)
@@ -297,36 +307,11 @@ namespace pcl
           * \param[in] x the X position of the axes
           * \param[in] y the Y position of the axes
           * \param[in] z the Z position of the axes
-          * \param[in] viewport the view port where the 3D axes should be added (default: all)
-          */
-        PCL_DEPRECATED (
-        "addCoordinateSystem (scale, x, y, z, viewport) is deprecated, please use function "
-        "addCoordinateSystem (scale, x, y, z, id, viewport) with id a unique string identifier.")
-        void
-        addCoordinateSystem (double scale, float x, float y, float z, int viewport);
-
-        /** \brief Adds 3D axes describing a coordinate system to screen at x, y, z
-          * \param[in] scale the scale of the axes (default: 1)
-          * \param[in] x the X position of the axes
-          * \param[in] y the Y position of the axes
-          * \param[in] z the Z position of the axes
           * \param[in] id the coordinate system object id (default: reference)
           * \param[in] viewport the view port where the 3D axes should be added (default: all)
           */
         void
         addCoordinateSystem (double scale, float x, float y, float z, const std::string &id = "reference", int viewport = 0);
-
-         /** \brief Adds 3D axes describing a coordinate system to screen at x, y, z, Roll,Pitch,Yaw
-           *
-           * \param[in] scale the scale of the axes (default: 1)
-           * \param[in] t transformation matrix
-           * \param[in] viewport the view port where the 3D axes should be added (default: all)
-           */
-        PCL_DEPRECATED (
-        "addCoordinateSystem (scale, t, viewport) is deprecated, please use function "
-        "addCoordinateSystem (scale, t, id, viewport) with id a unique string identifier.")
-        void
-        addCoordinateSystem (double scale, const Eigen::Affine3f& t, int viewport);
 
          /** \brief Adds 3D axes describing a coordinate system to screen at x, y, z, Roll,Pitch,Yaw
            *
@@ -365,15 +350,6 @@ namespace pcl
 
         void
         addCoordinateSystem (double scale, const Eigen::Affine3f& t, const std::string &id = "reference", int viewport = 0);
-
-        /** \brief Removes a previously added 3D axes (coordinate system)
-          * \param[in] viewport view port where the 3D axes should be removed from (default: all)
-          */
-        PCL_DEPRECATED (
-        "removeCoordinateSystem (viewport) is deprecated, please use function "
-        "addCoordinateSystem (id, viewport) with id a unique string identifier.")
-        bool
-        removeCoordinateSystem (int viewport);
 
         /** \brief Removes a previously added 3D axes (coordinate system)
           * \param[in] id the coordinate system object id (default: reference)
@@ -575,6 +551,28 @@ namespace pcl
         template <typename PointT> bool
         addText3D (const std::string &text,
                    const PointT &position,
+                   double textScale = 1.0,
+                   double r = 1.0, double g = 1.0, double b = 1.0,
+                   const std::string &id = "", int viewport = 0);
+
+        /** \brief Add a 3d text to the scene
+          * \param[in] text the text to add
+          * \param[in] position the world position where the text should be added
+          * \param[in] orientation the angles of rotation of the text around X, Y and Z axis,
+                       in this order. The way the rotations are effectively done is the
+                       Z-X-Y intrinsic rotations:
+                       https://en.wikipedia.org/wiki/Euler_angles#Definition_by_intrinsic_rotations
+          * \param[in] textScale the scale of the text to render
+          * \param[in] r the red color value
+          * \param[in] g the green color value
+          * \param[in] b the blue color value
+          * \param[in] id the text object id (default: equal to the "text" parameter)
+          * \param[in] viewport the view port (default: all)
+          */
+        template <typename PointT> bool
+        addText3D (const std::string &text,
+                   const PointT &position,
+                   double orientation[3],
                    double textScale = 1.0,
                    double r = 1.0, double g = 1.0, double b = 1.0,
                    const std::string &id = "", int viewport = 0);
@@ -1200,7 +1198,19 @@ namespace pcl
         setShapeRenderingProperties (int property, double value,
                                      const std::string &id, int viewport = 0);
 
-        /** \brief Set the rendering properties of a shape (3x values - e.g., RGB)
+        /** \brief Set the rendering properties of a shape (2x values - e.g., LUT minmax values)
+          * \param[in] property the property type
+          * \param[in] val1 the first value to be set
+          * \param[in] val2 the second value to be set
+          * \param[in] id the shape object id
+          * \param[in] viewport the view port where the shape's properties should be modified (default: all)
+          * \note When using \ref addPolygonMesh you you should use \ref setPointCloudRenderingProperties
+          */
+         bool
+         setShapeRenderingProperties (int property, double val1, double val2,
+                                      const std::string &id, int viewport = 0);
+
+         /** \brief Set the rendering properties of a shape (3x values - e.g., RGB)
           * \param[in] property the property type
           * \param[in] val1 the first value to be set
           * \param[in] val2 the second value to be set
@@ -1650,6 +1660,11 @@ namespace pcl
         void
         setShowFPS (bool show_fps);
 
+        /** Get the current rendering framerate.
+          * \see setShowFPS */
+        float
+        getFPS () const;
+
         /** \brief Renders a virtual scene as seen from the camera viewpoint and returns the rendered point cloud.
           * ATT: This method will only render the scene if only on viewport exists. Otherwise, returns an empty
           * point cloud and exits immediately.
@@ -1922,7 +1937,36 @@ namespace pcl
         vtkSmartPointer<vtkRenderWindowInteractor> interactor_;
 #endif
       private:
-        struct ExitMainLoopTimerCallback : public vtkCommand
+        /** \brief Internal function for renderer setup
+         * \param[in] vtk renderer
+         */
+        void setupRenderer (vtkSmartPointer<vtkRenderer> ren);
+
+        /** \brief Internal function for setting up FPS callback
+         * \param[in] vtk renderer
+         */
+        void setupFPSCallback (const vtkSmartPointer<vtkRenderer>& ren);
+
+        /** \brief Internal function for setting up render window
+         * \param[in] name the window name
+         */
+        void setupRenderWindow (const std::string& name);
+
+        /** \brief Internal function for setting up interactor style
+         */
+        void setupStyle ();
+
+        /** \brief Internal function for setting the default render window size and position on screen
+         */
+        void setDefaultWindowSizeAndPos ();
+
+        /** \brief Internal function for setting up camera parameters
+         * \param[in] argc
+         * \param[in] argv
+         */
+        void setupCamera (int &argc, char **argv);
+
+        struct PCL_EXPORTS ExitMainLoopTimerCallback : public vtkCommand
         {
           static ExitMainLoopTimerCallback* New ()
           {
@@ -1935,7 +1979,7 @@ namespace pcl
           PCLVisualizer* pcl_visualizer;
         };
 
-        struct ExitCallback : public vtkCommand
+        struct PCL_EXPORTS ExitCallback : public vtkCommand
         {
           static ExitCallback* New ()
           {
@@ -1948,20 +1992,21 @@ namespace pcl
         };
 
         //////////////////////////////////////////////////////////////////////////////////////////////
-        struct FPSCallback : public vtkCommand
+        struct PCL_EXPORTS FPSCallback : public vtkCommand
         {
           static FPSCallback *New () { return (new FPSCallback); }
 
-          FPSCallback () : actor (), pcl_visualizer (), decimated () {}
-          FPSCallback (const FPSCallback& src) : vtkCommand (), actor (src.actor), pcl_visualizer (src.pcl_visualizer), decimated (src.decimated) {}
-          FPSCallback& operator = (const FPSCallback& src) { actor = src.actor; pcl_visualizer = src.pcl_visualizer; decimated = src.decimated; return (*this); }
+          FPSCallback () : actor (), pcl_visualizer (), decimated (), last_fps(0.0f) {}
+          FPSCallback (const FPSCallback& src) : vtkCommand (), actor (src.actor), pcl_visualizer (src.pcl_visualizer), decimated (src.decimated), last_fps (src.last_fps) {}
+          FPSCallback& operator = (const FPSCallback& src) { actor = src.actor; pcl_visualizer = src.pcl_visualizer; decimated = src.decimated; last_fps = src.last_fps; return (*this); }
 
           virtual void 
           Execute (vtkObject*, unsigned long event_id, void*);
-            
+
           vtkTextActor *actor;
           PCLVisualizer* pcl_visualizer;
           bool decimated;
+          float last_fps;
         };
 
         /** \brief The FPSCallback object for the current visualizer. */
