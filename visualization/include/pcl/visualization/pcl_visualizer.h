@@ -103,7 +103,8 @@ namespace pcl
           */
         PCLVisualizer (const std::string &name = "", const bool create_interactor = true);
 
-        /** \brief PCL Visualizer constructor.
+        /** \brief PCL Visualizer constructor. It looks through the passed argv arguments to find the "-cam *.cam" argument. 
+          *        If the search failed, the name for cam file is calculated with boost uuid. If there is no such file, camera is not initilalized.
           * \param[in] argc
           * \param[in] argv
           * \param[in] name the window name (empty by default)
@@ -1179,6 +1180,19 @@ namespace pcl
         getPointCloudRenderingProperties (int property, double &value,
                                           const std::string &id = "cloud");
         
+       /** \brief Get the rendering properties of a PointCloud
+         * \param[in] property the property type
+         * \param[out] val1 the resultant property value
+         * \param[out] val2 the resultant property value
+         * \param[out] val3 the resultant property value
+         * \param[in] id the point cloud object id (default: cloud)
+         * \return True if the property is effectively retrieved.
+         * \note The list of properties can be found in \ref pcl::visualization::LookUpTableRepresentationProperties.
+         */
+        bool
+        getPointCloudRenderingProperties (RenderingProperties property, double &val1, double &val2, double &val3,
+                                          const std::string &id = "cloud");
+
         /** \brief Set whether the point cloud is selected or not 
          *  \param[in] selected whether the cloud is selected or not (true = selected)
          *  \param[in] id the point cloud object id (default: cloud)
@@ -1536,6 +1550,37 @@ namespace pcl
         addLine (const pcl::ModelCoefficients &coefficients,
                  const std::string &id = "line",
                  int viewport = 0);
+
+        /** \brief Add a line from a set of given model coefficients
+          * \param[in] coefficients the model coefficients (point_on_line, direction)
+          * \param[in] id the line id/name (default: "line")
+          * \param[in] viewport (optional) the id of the new viewport (default: 0)
+          *
+          * \code
+          * // The following are given (or computed using sample consensus techniques)
+          * // See SampleConsensusModelLine for more information
+          * // Eigen::Vector3f point_on_line, line_direction;
+          *
+          * pcl::ModelCoefficients line_coeff;
+          * line_coeff.values.resize (6);    // We need 6 values
+          * line_coeff.values[0] = point_on_line.x ();
+          * line_coeff.values[1] = point_on_line.y ();
+          * line_coeff.values[2] = point_on_line.z ();
+          *
+          * line_coeff.values[3] = line_direction.x ();
+          * line_coeff.values[4] = line_direction.y ();
+          * line_coeff.values[5] = line_direction.z ();
+          *
+          * addLine (line_coeff);
+          * \endcode
+          */
+        bool
+        addLine (const pcl::ModelCoefficients &coefficients,
+                 const char *id = "line",
+                 int viewport = 0)
+        {
+          return addLine (coefficients, std::string (id), viewport);
+        }
 
         /** \brief Add a plane from a set of given model coefficients
           * \param[in] coefficients the model coefficients (a, b, c, d with ax+by+cz+d=0)
@@ -2266,7 +2311,7 @@ namespace pcl
                                 vtkTexture* vtk_tex) const;
 
         /** \brief Get camera file for camera parameter saving/restoring from command line.
-          * Camera filename is calculated using sha1 value of all pathes of input .pcd files
+          * Camera filename is calculated using sha1 value of all paths of input .pcd files
           * \return empty string if failed.
           */
         std::string

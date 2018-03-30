@@ -5,14 +5,13 @@ cache:
 addons:
   apt:
     sources:
-      - kalakris-cmake
-      - boost-latest
-      - kubuntu-backports
-      - sourceline: 'ppa:kedazo/doxygen-updates-precise'
       - sourceline: 'ppa:v-launchpad-jochen-sprickerhof-de/pcl'
     packages:
       - cmake
-      - libboost1.55-all-dev
+      - libboost-filesystem1.54-dev
+      - libboost-iostreams1.54-dev
+      - libboost-thread1.54-dev
+      - libboost-chrono1.54-dev
       - libeigen3-dev
       - libgtest-dev
       - doxygen-latex
@@ -27,6 +26,7 @@ addons:
       - libvtk5-qt4-dev
       - libglew-dev
       - libopenni-dev
+      - python3-pip
 before_install:
   - bash .travis.sh before-install
 
@@ -82,8 +82,5 @@ jobs:
       env: TASK="test-core"
       script: bash .travis.sh $TASK
     - compiler: gcc
-      env: TASK="test-ext-1"
-      script: bash .travis.sh $TASK
-    - compiler: gcc
-      env: TASK="test-ext-2"
+      env: TASK="test-ext"
       script: bash .travis.sh $TASK

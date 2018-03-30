@@ -93,7 +93,7 @@ macro(find_boost)
   else(${CMAKE_VERSION} VERSION_LESS 2.8.5)
     set(Boost_ADDITIONAL_VERSIONS
       "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@.@Boost_SUBMINOR_VERSION@" "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@"
-      "1.65.0" "1.65"
+      "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
       "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
       "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
       "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
@@ -131,6 +131,7 @@ macro(find_qhull)
     get_filename_component(QHULL_ROOT "@QHULL_INCLUDE_DIRS@" PATH)
   endif(PCL_ALL_IN_ONE_INSTALLER)
 
+  set(QHULL_USE_STATIC @QHULL_USE_STATIC@)
   find_package(Qhull)
 endmacro(find_qhull)
 
@@ -218,6 +219,7 @@ macro(find_flann)
     get_filename_component(FLANN_ROOT "@FLANN_INCLUDE_DIRS@" PATH)
   endif(PCL_ALL_IN_ONE_INSTALLER)
 
+  set(FLANN_USE_STATIC @FLANN_USE_STATIC@)
   find_package(FLANN)
 endmacro(find_flann)
 
@@ -263,7 +265,7 @@ endmacro(find_glew)
 #                   |--> _lib is optional ==> disable it (thanks to the guardians) 
 #                   |                         and warn
 #                   `--> _lib is required
-#                                       |--> component is required explicitely ==> error
+#                                       |--> component is required explicitly ==> error
 #                                       `--> component is induced ==> warn and remove it
 #                                                                     from the list
 
@@ -480,6 +482,7 @@ foreach(component ${PCL_TO_FIND_COMPONENTS})
           gpu/${gpu_component}/include
     DOC "path to ${component} headers"
     NO_DEFAULT_PATH)
+  mark_as_advanced(PCL_${COMPONENT}_INCLUDE_DIR)
 
   if(PCL_${COMPONENT}_INCLUDE_DIR)
     list(APPEND PCL_${COMPONENT}_INCLUDE_DIRS "${PCL_${COMPONENT}_INCLUDE_DIR}")
@@ -497,11 +500,14 @@ foreach(component ${PCL_TO_FIND_COMPONENTS})
     get_filename_component(${component}_library_path 
       ${PCL_${COMPONENT}_LIBRARY}
       PATH)
+    mark_as_advanced(PCL_${COMPONENT}_LIBRARY)
 
     find_library(PCL_${COMPONENT}_LIBRARY_DEBUG ${pcl_component}${PCL_DEBUG_SUFFIX}
       HINTS ${PCL_LIBRARY_DIRS} 
       DOC "path to ${pcl_component} library debug"
       NO_DEFAULT_PATH)
+    mark_as_advanced(PCL_${COMPONENT}_LIBRARY_DEBUG)
+
     if(PCL_${COMPONENT}_LIBRARY_DEBUG)
       get_filename_component(${component}_library_path_debug 
         ${PCL_${COMPONENT}_LIBRARY_DEBUG}

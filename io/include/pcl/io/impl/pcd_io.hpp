@@ -197,6 +197,11 @@ pcl::PCDWriter::writeBinary (const std::string &file_name,
   // Prepare the map
 #if _WIN32
   HANDLE fm = CreateFileMappingA (h_native_file, NULL, PAGE_READWRITE, 0, (DWORD) (data_idx + data_size), NULL);
+  if (fm == NULL)
+  {
+      throw pcl::IOException("[pcl::PCDWriter::writeBinary] Error during memory map creation ()!");
+      return (-1);
+  }
   char *map = static_cast<char*>(MapViewOfFile (fm, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, data_idx + data_size));
   CloseHandle (fm);
 
@@ -351,11 +356,11 @@ pcl::PCDWriter::writeBinaryCompressed (const std::string &file_name,
   //   pters[3] = &only_valid_data[offset_of_plane_RGB];
   //
   std::vector<char*> pters (fields.size ());
-  int toff = 0;
+  size_t toff = 0;
   for (size_t i = 0; i < pters.size (); ++i)
   {
     pters[i] = &only_valid_data[toff];
-    toff += fields_sizes[i] * static_cast<int> (cloud.points.size ());
+    toff += static_cast<size_t>(fields_sizes[i]) * cloud.points.size();
   }
   
   // Go over all the points, and copy the data in the appropriate places
